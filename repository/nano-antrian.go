@@ -8,6 +8,7 @@ type NanoAntrian interface {
 	GetJumlahAntrian(idPelayanan string) (models.JumlahAntrian, error)
 	DisplayAntrian() ([]models.DisplayAntrian, error)
 	ExportAntrian(start, end string) (string, error)
+	GetJamKedatangan() int
 	// GetUser(userName string)(models.DetailUser, error)
 	NextAntrian(idPelayanan string) error
 	Scheduler() error

@@ -223,14 +223,18 @@ func (p *AntrianRepo) NextButton(c *gin.Context) {
 	// i, _ := strconv.Atoi(idPelayanan)
 	err := p.repo.NextAntrian(idPelayanan)
 	if err != nil {
-		log.Println(err.Error())
+		// log.Println(err.Error())
 		c.AbortWithStatusJSON(c.Writer.Status(), handler.ErrorHandler(400, 400, err.Error()))
 		return
 	}
 
-	c.Header("Content-Type", "application/json")
 	c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
-	// json.NewEncoder(c.Writer).Encode(responses)
+	c.Header("Content-Type", "application/json")
+	c.JSON(200, gin.H{
+		"status":  200,
+		"message": "Suskes update antrian",
+		// "vendorID":   q,
+	})
 }
 
 func (p *AntrianRepo) Scheduler(c *gin.Context) {

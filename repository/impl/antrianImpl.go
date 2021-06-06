@@ -251,6 +251,26 @@ func inTimeSpan(start, end, check time.Time) bool {
 	return check.After(start) && check.Before(end)
 }
 
+func (m *mySQLAntrian) GetJamKedatangan() int {
+	var (
+		start string
+		end   string
+	)
+	// i := 0
+	rows, err := m.Conn.Queryx(`select start_jam, end_jam from ref_jam_kedatangan`)
+	if err != nil {
+		log.Panicln(err)
+	}
+	for rows.Next() {
+		err := rows.Scan(&start, &end)
+		if err != nil {
+			log.Panicln(err)
+		}
+
+	}
+	return 0
+}
+
 var idJam int
 
 func getJamKedatanganID() int {
@@ -261,11 +281,12 @@ func getJamKedatanganID() int {
 	layoutJam := "15:04"
 	dates := dt.Format("15:04")
 	datesParse, _ := time.Parse(layoutJam, dates)
+
 	// ======================== jam ke 1 ========================
-	start1 := "15:00"
+	start1 := "17:00"
 	startParse1, _ := time.Parse(layoutJam, start1)
 
-	end1 := "16:00"
+	end1 := "18:00"
 	endParse1, _ := time.Parse(layoutJam, end1)
 
 	jam1 := inTimeSpan(startParse1, endParse1, datesParse)
@@ -334,11 +355,55 @@ func getJamKedatanganID() int {
 	return idJam
 }
 
+var jamKdtng string
+
+func getMinute(idJam int) float64 {
+
+	dt := time.Now()
+	layoutJam := "15:04"
+	currentTime := dt.Format("15:04")
+
+	switch idJam {
+	case 1:
+		jamKdtng = "17:00"
+	case 2:
+		jamKdtng = "09:00"
+	case 3:
+		jamKdtng = "10:00"
+	case 4:
+		jamKdtng = "11:00"
+	case 5:
+		jamKdtng = "13:00"
+	case 6:
+		jamKdtng = "14:00"
+	}
+
+	pTime1, _ := time.Parse(layoutJam, jamKdtng)
+	pTime2, _ := time.Parse(layoutJam, currentTime)
+
+	diff := pTime2.Sub(pTime1).Minutes()
+
+	return diff
+}
+
+type OnProgres struct {
+	ID           int
+	Jam_dilayani string
+}
+
 func (m *mySQLAntrian) NextAntrian(idPelayanan string) error {
 	idJam := getJamKedatanganID()
 	var idAntWaiting int
-	var idAntOnProgress int
+	// var idAntOnProgress int
+	Onprogress := OnProgres{}
+	// var jamDilayani string
 	iPelayanan, _ := strconv.Atoi(idPelayanan)
+	layoutJam := "15:04"
+	dt := time.Now()
+	currentTime := dt.Format("15:04")
+	lamaMenunggu := getMinute(idJam)
+	// lamaLayanan := dt.Format("15:04")
+	log.Println("menit nya  ", lamaMenunggu)
 
 	tx := m.Conn.MustBegin()
 
@@ -346,34 +411,41 @@ func (m *mySQLAntrian) NextAntrian(idPelayanan string) error {
 	where tanggal_kedatangan = '2021-04-25'
 	and jam_kedatangan = $1
 	and id_pelayanan = $2
-	and status = 'waiting'
+	and status = 'Waiting'
 	order by no_antrian ASC
 	limit 1`, idJam, iPelayanan)
 
 	if err != nil {
 		log.Println("ERROR DI GET id waiting", err)
-		return err
+		// return err
 	}
 
-	errOp := m.Conn.Get(&idAntOnProgress, `select id from tran_form_isian
+	errOp := m.Conn.Get(&Onprogress, `select id, jam_dilayani from tran_form_isian
 	where tanggal_kedatangan = '2021-04-25'
-	and jam_kedatangan = $1
-	and id_pelayanan = $2
+	and jam_kedatangan = $2
+	and id_pelayanan = $1
 	and status = 'On Progress'
 	order by no_antrian asc limit 1`, idPelayanan, idJam)
 
 	if errOp != nil {
 		log.Println("ERROR DI GET id done ", errOp)
-		return err
+		// return err
 	}
 
-	_, errEx := tx.Exec(`UPDATE tran_form_isian SET status = 'On Progress' WHERE id =$1`, idAntWaiting)
+	_, errEx := tx.Exec(`UPDATE tran_form_isian SET status = 'On Progress', jam_dilayani = $2, lama_menunggu = $3 WHERE id =$1`, idAntWaiting, currentTime, lamaMenunggu)
 	if errEx != nil {
 		tx.Rollback()
 		return errEx
 	}
 
-	_, errExOP := tx.Exec(`UPDATE tran_form_isian SET status = 'Done' WHERE id =$1`, idAntOnProgress)
+	jamSkrng, _ := time.Parse(layoutJam, currentTime)
+	jamDilayani, _ := time.Parse(time.RFC3339, Onprogress.Jam_dilayani)
+	// log.Println("jam dilayani di ", Onprogress.Jam_dilayani)
+	// log.Println("jam skarang di ", jamSkrng)
+	lamaPelayanan := jamSkrng.Sub(jamDilayani).Minutes()
+	log.Println("lama di layanai ", lamaPelayanan, "menit")
+
+	_, errExOP := tx.Exec(`UPDATE tran_form_isian SET status = 'Done', lama_pelayanan =$2 WHERE id =$1`, Onprogress.ID, lamaPelayanan)
 	if errExOP != nil {
 		return errExOP
 	}
