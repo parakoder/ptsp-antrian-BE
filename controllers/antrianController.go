@@ -38,7 +38,7 @@ func (p *AntrianRepo) SignIn(c *gin.Context) {
 	err := c.Request.ParseMultipartForm(4096)
 	params["username"] = c.Request.FormValue("username")
 	params["password"] = c.Request.FormValue("password")
-
+	log.Println("TESSSS")
 	tokenString, errT := p.repo.SignIn(params)
 	if errT != nil {
 		log.Println("mantap ")
