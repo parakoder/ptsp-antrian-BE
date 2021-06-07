@@ -108,4 +108,5 @@ type ExportAntrian struct {
 	Status string
 	Lama_menunggu int
 	Lama_pelayanan int
+	Jam_Dilayani *time.Time
 }

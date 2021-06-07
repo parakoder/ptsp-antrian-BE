@@ -168,7 +168,8 @@ func (m *mySQLAntrian) ExportAntrian(start string, end string) (string, error) {
 		rjk.keterangan as jam_kedatangan, 
 		status, 
 		COALESCE(lama_menunggu, 0) as lama_menunggu, 
-		COALESCE(lama_pelayanan, 0) as lama_pelayanan 
+		COALESCE(lama_pelayanan, 0) as lama_pelayanan, 
+		COALESCE(jam_dilayani, NULL) as jam_dilayani 
 	from 
 		tran_form_isian t 
 		left join mst_pelayanan mp on mp.id = t.id_pelayanan 
@@ -215,6 +216,7 @@ func GenerateExlxs(arrX []models.ExportAntrian) (string, error) {
 	xlsx.SetCellValue(sheet1Name, "J1", "Status")
 	xlsx.SetCellValue(sheet1Name, "K1", "Lama menunggu")
 	xlsx.SetCellValue(sheet1Name, "L1", "Lama pelayanan")
+	xlsx.SetCellValue(sheet1Name, "M1", "Jam Dilayani")
 
 	// err := xlsx.AutoFilter(sheet1Name, "A1", "C1", "")
 	// if err != nil {
@@ -223,6 +225,11 @@ func GenerateExlxs(arrX []models.ExportAntrian) (string, error) {
 
 	for i, each := range arrX {
 		log.Println("data ", each.Nama_lengkap)
+		// jamDilayani, _ := time.Parse(time.RFC3339, Onprogress.Jam_dilayani)
+
+		// jamDilayani:= each.Jam_Dilayani.Format(time.RFC3339, )
+
+
 		xlsx.SetCellValue(sheet1Name, fmt.Sprintf("A%d", i+2), each.Nama_lengkap)
 		xlsx.SetCellValue(sheet1Name, fmt.Sprintf("B%d", i+2), each.No_identitas)
 		xlsx.SetCellValue(sheet1Name, fmt.Sprintf("C%d", i+2), each.Jenis_kelamin)
@@ -235,6 +242,7 @@ func GenerateExlxs(arrX []models.ExportAntrian) (string, error) {
 		xlsx.SetCellValue(sheet1Name, fmt.Sprintf("J%d", i+2), each.Status)
 		xlsx.SetCellValue(sheet1Name, fmt.Sprintf("K%d", i+2), each.Lama_menunggu)
 		xlsx.SetCellValue(sheet1Name, fmt.Sprintf("L%d", i+2), each.Lama_pelayanan)
+		xlsx.SetCellValue(sheet1Name, fmt.Sprintf("M%d", i+2), each.Jam_Dilayani)
 	}
 
 	err := xlsx.SaveAs("./files/" + arrX[0].Loket + ".xlsx")
@@ -283,10 +291,10 @@ func getJamKedatanganID() int {
 	datesParse, _ := time.Parse(layoutJam, dates)
 
 	// ======================== jam ke 1 ========================
-	start1 := "17:00"
+	start1 := "08:00"
 	startParse1, _ := time.Parse(layoutJam, start1)
 
-	end1 := "18:00"
+	end1 := "09:00"
 	endParse1, _ := time.Parse(layoutJam, end1)
 
 	jam1 := inTimeSpan(startParse1, endParse1, datesParse)
@@ -365,7 +373,7 @@ func getMinute(idJam int) float64 {
 
 	switch idJam {
 	case 1:
-		jamKdtng = "17:00"
+		jamKdtng = "08:00"
 	case 2:
 		jamKdtng = "09:00"
 	case 3:
@@ -400,20 +408,22 @@ func (m *mySQLAntrian) NextAntrian(idPelayanan string) error {
 	iPelayanan, _ := strconv.Atoi(idPelayanan)
 	layoutJam := "15:04"
 	dt := time.Now()
+	currentDate := dt.Format("2006-01-02")
 	currentTime := dt.Format("15:04")
 	lamaMenunggu := getMinute(idJam)
 	// lamaLayanan := dt.Format("15:04")
 	log.Println("menit nya  ", lamaMenunggu)
+	log.Println("tanggal sekarang  ", currentDate)
 
 	tx := m.Conn.MustBegin()
 
 	err := m.Conn.Get(&idAntWaiting, `select id from tran_form_isian
-	where tanggal_kedatangan = '2021-04-25'
+	where tanggal_kedatangan = $3
 	and jam_kedatangan = $1
 	and id_pelayanan = $2
 	and status = 'Waiting'
 	order by no_antrian ASC
-	limit 1`, idJam, iPelayanan)
+	limit 1`, idJam, iPelayanan, currentDate)
 
 	if err != nil {
 		log.Println("ERROR DI GET id waiting", err)
@@ -421,11 +431,11 @@ func (m *mySQLAntrian) NextAntrian(idPelayanan string) error {
 	}
 
 	errOp := m.Conn.Get(&Onprogress, `select id, jam_dilayani from tran_form_isian
-	where tanggal_kedatangan = '2021-04-25'
+	where tanggal_kedatangan = $3
 	and jam_kedatangan = $2
 	and id_pelayanan = $1
 	and status = 'On Progress'
-	order by no_antrian asc limit 1`, idPelayanan, idJam)
+	order by no_antrian asc limit 1`, idPelayanan, idJam, currentDate)
 
 	if errOp != nil {
 		log.Println("ERROR DI GET id done ", errOp)
