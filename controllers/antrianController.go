@@ -35,7 +35,7 @@ func (p *AntrianRepo) SignIn(c *gin.Context) {
 	var responses models.ResponseToken
 	var params = map[string]string{}
 	// err := c.ParseMultipartForm(4096)
-	err := c.Request.ParseMultipartForm(4096)
+	// err := c.Request.ParseMultipartForm(4096)
 	params["username"] = c.Request.FormValue("username")
 	params["password"] = c.Request.FormValue("password")
 	log.Println("TESSSS")
