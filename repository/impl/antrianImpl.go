@@ -118,17 +118,17 @@ func (m *mySQLAntrian) GetJumlahAntrian(idPelayanan string) (models.JumlahAntria
 		return ja, eTa
 	}
 
-	eAs := m.Conn.Get(&ja.AntrianSelesai, `select count(id) from tran_form_isian where id_pelayanan = $1 AND status = 'done'`, idPelayanan)
+	eAs := m.Conn.Get(&ja.AntrianSelesai, `select count(id) from tran_form_isian where id_pelayanan = $1 AND status = 'Done'`, idPelayanan)
 	if eAs != nil {
 		return ja, eAs
 	}
 
-	eAm := m.Conn.Get(&ja.AntrianBerlangsung, `select count(id) from tran_form_isian where status = 'waiting' and id_pelayanan = $1`, idPelayanan)
+	eAm := m.Conn.Get(&ja.AntrianBerlangsung, `select count(id) from tran_form_isian where status = 'Waiting' and id_pelayanan = $1`, idPelayanan)
 	if eAm != nil {
 		return ja, eAm
 	}
 
-	eNa := m.Conn.Get(&ja.NoAntiran, `select no_antrian from tran_form_isian where status = 'on progress' and id_pelayanan = $1`, idPelayanan)
+	eNa := m.Conn.Get(&ja.NoAntiran, `select no_antrian from tran_form_isian where status = 'On Progress' and id_pelayanan = $1`, idPelayanan)
 	if eNa != nil {
 		return ja, eNa
 	}
