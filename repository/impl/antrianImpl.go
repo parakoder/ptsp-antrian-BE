@@ -34,6 +34,8 @@ func (m *mySQLAntrian) SignIn(params map[string]string) (string, error) {
 	if e != nil {
 		return "", e
 	}
+
+	defer q.Close()
 	for q.Next() {
 		if err := q.StructScan(&User); err != nil {
 			return "", err
@@ -80,7 +82,8 @@ func (m *mySQLAntrian) AntrianList(idPelayanan string) ([]models.AntrianList, er
 	if err != nil {
 		return nil, err
 	}
-	log.Println("coyyy masuk", q)
+	// log.Println("coyyy masuk", q)
+	defer q.Close()
 	for q.Next() {
 		// log.Println("coyyy masuk")
 		var a models.AntrianList
@@ -141,6 +144,7 @@ func (m *mySQLAntrian) DisplayAntrian() ([]models.DisplayAntrian, error) {
 	if e != nil {
 		return nil, e
 	}
+	defer q.Close()
 	for q.Next() {
 		var da models.DisplayAntrian
 		eScan := q.StructScan(&da)
@@ -462,7 +466,6 @@ func (m *mySQLAntrian) NextAntrian(idPelayanan string) error {
 
 	tx.Commit()
 
-	// log.Println("MASUKKK ", idAntrian)
 	return nil
 }
 
