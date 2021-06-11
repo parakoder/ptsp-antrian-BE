@@ -9,11 +9,13 @@ type ResponseAntrian struct {
 }
 
 type AntrianList struct {
-	Nama_Lengkap string `json:"nama"`
-	Tanggal_Kedatangan time.Time `json:"tanggalKedatangan"`
-	Loket string `json:"Loket"`
-	Jam_Kedatangan int `json:"jamKedatangan"`
 	No_Antrian string `json:"noAntrian"`
+	Loket string `json:"Loket"`
+	Jam_Kedatangan string `json:"jamKedatangan"`
+	
+	Lama_Menunggu *int `json:"lamaMenunggu"`
+	Lama_Pelayanan *int `json:"lamaPelayanan"`
+	Jam_Dilayani *time.Time `json:"jamDilayani"`
 }
 
 type ResponseUser struct {
@@ -30,6 +32,7 @@ type User struct {
 	OnlineID string `json:"onlineID"`
 	OfflineID string `json:"offlineID"`
 	NamaLayanan string `json:"namaPelayanan"`
+	
 }
 
 type JumlahAntrian struct {
@@ -109,4 +112,10 @@ type ExportAntrian struct {
 	Lama_menunggu int
 	Lama_pelayanan int
 	Jam_Dilayani *time.Time
+}
+
+type ResponseCall struct {
+	Status int `json:"status"`
+	Message string `json:"message"`
+	Data []string `json:"data"`
 }

@@ -11,6 +11,7 @@ type NanoAntrian interface {
 	GetJamKedatangan() int
 	// GetUser(userName string)(models.DetailUser, error)
 	NextAntrian(idPelayanan string) error
+	CallButton(idPelayanan string) (string, error)
 	Scheduler() error
 	SignIn(params map[string]string) (string, error)
 }

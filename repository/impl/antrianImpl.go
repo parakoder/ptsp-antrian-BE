@@ -76,8 +76,9 @@ func (m *mySQLAntrian) SignIn(params map[string]string) (string, error) {
 func (m *mySQLAntrian) AntrianList(idPelayanan string) ([]models.AntrianList, error) {
 	var arrAntrian []models.AntrianList
 
-	q, err := m.Conn.Queryx(`SELECT nama_lengkap, tanggal_kedatangan, mp.nama as loket, jam_kedatangan, no_antrian FROM tran_form_isian t
+	q, err := m.Conn.Queryx(`SELECT no_antrian, mp.nama as loket, rjk.keterangan as jam_kedatangan, jam_dilayani, lama_menunggu, lama_pelayanan FROM tran_form_isian t
 	LEFT JOIN mst_pelayanan mp on mp.id = t.id_pelayanan
+	LEFT JOIN ref_jam_kedatangan rjk on rjk.jam = t.jam_kedatangan
 	WHERE id_pelayanan = $1`, idPelayanan)
 	if err != nil {
 		return nil, err
@@ -480,4 +481,16 @@ func (m *mySQLAntrian) Scheduler() error {
 
 	tx.Commit()
 	return nil
+}
+
+func (m *mySQLAntrian)CallButton(idPelayanan string) (string, error){
+	
+	var NoAntiran string
+
+	err := m.Conn.Get(&NoAntiran, `SELECT no_antrian from tran_form_isian where status = 'On Progress' AND id_pelayanan = $1`, idPelayanan)
+	if err != nil {
+		return "", err
+	}
+
+	return NoAntiran, nil
 }

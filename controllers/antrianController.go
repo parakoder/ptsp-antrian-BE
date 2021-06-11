@@ -256,3 +256,34 @@ func (p *AntrianRepo) Scheduler(c *gin.Context) {
 	c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
 	// json.NewEncoder(c.Writer).Encode(responses)
 }
+
+
+func (p *AntrianRepo) CallButton(c *gin.Context) {
+	c.Header("Access-Control-Allow-Headers", "Content-type")
+	c.Header("Access-Control-Allow-Method", "POST, GET, OPTIONS, PUT, DELETE")
+	c.Header("Access-Control-Allow-Origin", "*")
+	idPelayanan := c.Query("idPelayanan")
+	var responses models.ResponseCall
+	token := c.Request.Header.Get("Authorization")
+
+	_, errC := auth.ValidateToken(token)
+	if errC != nil {
+		c.AbortWithStatusJSON(400, handler.ErrorHandler(400, 422, errC.Error()))
+		return
+	}
+	noAntrian, err := p.repo.CallButton(idPelayanan)
+	if err != nil {
+		// log.Println(err.Error())
+		c.AbortWithStatusJSON(c.Writer.Status(), handler.ErrorHandler(400, 400, err.Error()))
+		return
+	}
+
+	no := []rune(noAntrian)
+	panggil := []string{"bell", "nomorantrian", string(no[0]), string(no[1]), "diloket", idPelayanan, "-end"}
+	responses.Status = 200
+	responses.Message = "Success"
+	responses.Data = panggil
+	c.Header("Content-Type", "application/json")
+	c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+	json.NewEncoder(c.Writer).Encode(responses)
+}
