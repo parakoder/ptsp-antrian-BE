@@ -234,7 +234,6 @@ func GenerateExlxs(arrX []models.ExportAntrian) (string, error) {
 
 		// jamDilayani:= each.Jam_Dilayani.Format(time.RFC3339, )
 
-
 		xlsx.SetCellValue(sheet1Name, fmt.Sprintf("A%d", i+2), each.Nama_lengkap)
 		xlsx.SetCellValue(sheet1Name, fmt.Sprintf("B%d", i+2), each.No_identitas)
 		xlsx.SetCellValue(sheet1Name, fmt.Sprintf("C%d", i+2), each.Jenis_kelamin)
@@ -483,14 +482,27 @@ func (m *mySQLAntrian) Scheduler() error {
 	return nil
 }
 
-func (m *mySQLAntrian)CallButton(idPelayanan string) (string, error){
-	
-	var NoAntiran string
+func (m *mySQLAntrian) CallButton(idPelayanan string) (string, bool, error) {
 
+	var NoAntiran string
+	i, _ := strconv.Atoi(idPelayanan)
+	var pgl bool
+	tx := m.Conn.MustBegin()
+
+	panggil := m.Conn.Get(&pgl, `SELECT actived FROM panggil where actived =  true`)
+	if panggil != nil {
+		_, e := tx.Exec(`UPDATE panggil SET actived = true where id = $1`, i)
+		if e != nil {
+			tx.Rollback()
+		}
+
+		tx.Commit()
+
+	}
 	err := m.Conn.Get(&NoAntiran, `SELECT no_antrian from tran_form_isian where status = 'On Progress' AND id_pelayanan = $1`, idPelayanan)
 	if err != nil {
-		return "", err
+		return "", pgl, err
 	}
 
-	return NoAntiran, nil
+	return NoAntiran, pgl, nil
 }
