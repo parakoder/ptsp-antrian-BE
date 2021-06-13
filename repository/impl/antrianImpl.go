@@ -79,7 +79,7 @@ func (m *mySQLAntrian) AntrianList(idPelayanan string) ([]models.AntrianList, er
 	q, err := m.Conn.Queryx(`SELECT no_antrian, mp.nama as loket, rjk.keterangan as jam_kedatangan, jam_dilayani, lama_menunggu, lama_pelayanan FROM tran_form_isian t
 	LEFT JOIN mst_pelayanan mp on mp.id = t.id_pelayanan
 	LEFT JOIN ref_jam_kedatangan rjk on rjk.jam = t.jam_kedatangan
-	WHERE id_pelayanan = $1`, idPelayanan)
+	WHERE id_pelayanan = $1 order by jam_kedatangan ASC`, idPelayanan)
 	if err != nil {
 		return nil, err
 	}
@@ -483,9 +483,11 @@ func (m *mySQLAntrian) Scheduler() error {
 }
 
 func (m *mySQLAntrian) CallButton(idPelayanan string) (string, bool, error) {
-
+	idJam := getJamKedatanganID()
 	var NoAntiran string
 	i, _ := strconv.Atoi(idPelayanan)
+	dt := time.Now()
+	currentDate := dt.Format("2006-01-02")
 	var pgl bool
 	tx := m.Conn.MustBegin()
 
@@ -499,10 +501,12 @@ func (m *mySQLAntrian) CallButton(idPelayanan string) (string, bool, error) {
 		tx.Commit()
 
 	}
-	err := m.Conn.Get(&NoAntiran, `SELECT no_antrian from tran_form_isian where status = 'On Progress' AND id_pelayanan = $1`, idPelayanan)
+
+	log.Println("PARAM ", idPelayanan, idJam, currentDate)
+	err := m.Conn.Get(&NoAntiran, `SELECT no_antrian from tran_form_isian where status = 'On Progress' AND id_pelayanan = $1  AND jam_kedatangan = $2 AND tanggal_kedatangan =$3`, idPelayanan, idJam, currentDate)
 	if err != nil {
 		return "", pgl, err
 	}
-
+	log.Println("NO ANTRIAN ", NoAntiran)
 	return NoAntiran, pgl, nil
 }
