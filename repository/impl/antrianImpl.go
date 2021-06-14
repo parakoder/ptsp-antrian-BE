@@ -75,11 +75,12 @@ func (m *mySQLAntrian) SignIn(params map[string]string) (string, error) {
 
 func (m *mySQLAntrian) AntrianList(idPelayanan string) ([]models.AntrianList, error) {
 	var arrAntrian []models.AntrianList
-
+	dt := time.Now()
+	dates := dt.Format("2006.01.02")
 	q, err := m.Conn.Queryx(`SELECT no_antrian, mp.nama as loket, rjk.keterangan as jam_kedatangan, jam_dilayani, lama_menunggu, lama_pelayanan FROM tran_form_isian t
 	LEFT JOIN mst_pelayanan mp on mp.id = t.id_pelayanan
 	LEFT JOIN ref_jam_kedatangan rjk on rjk.jam = t.jam_kedatangan
-	WHERE id_pelayanan = $1 order by jam_kedatangan ASC`, idPelayanan)
+	WHERE id_pelayanan = $1 and tanggal_kedatangan = $2 and status = 'Done'order by jam_kedatangan DESC`, idPelayanan, dates)
 	if err != nil {
 		return nil, err
 	}
@@ -112,24 +113,30 @@ func (m *mySQLAntrian) GetUserByID(userName string) (models.User, error) {
 func (m *mySQLAntrian) GetJumlahAntrian(idPelayanan string) (models.JumlahAntrian, error) {
 
 	var ja models.JumlahAntrian
+	dt := time.Now()
+	dates := dt.Format("2006.01.02")
 
-	eTa := m.Conn.Get(&ja.TotalAntrian, `select count(id) from tran_form_isian where id_pelayanan = $1`, idPelayanan)
+	eTa := m.Conn.Get(&ja.TotalAntrian, `select count(id) from tran_form_isian where id_pelayanan = $1 and tanggal_Kedatangan =$2`, idPelayanan, dates)
 	if eTa != nil {
+		ja.TotalAntrian = 0
 		return ja, eTa
 	}
 
-	eAs := m.Conn.Get(&ja.AntrianSelesai, `select count(id) from tran_form_isian where id_pelayanan = $1 AND status = 'Done'`, idPelayanan)
+	eAs := m.Conn.Get(&ja.AntrianSelesai, `select count(id) from tran_form_isian where id_pelayanan = $1 AND status = 'Done' and tanggal_Kedatangan =$2`, idPelayanan, dates)
 	if eAs != nil {
+		ja.AntrianSelesai = 0
 		return ja, eAs
 	}
 
-	eAm := m.Conn.Get(&ja.AntrianBerlangsung, `select count(id) from tran_form_isian where status = 'Waiting' and id_pelayanan = $1`, idPelayanan)
+	eAm := m.Conn.Get(&ja.AntrianBerlangsung, `select count(id) from tran_form_isian where status = 'Waiting' and id_pelayanan = $1 and tanggal_Kedatangan =$2`, idPelayanan, dates)
 	if eAm != nil {
+		ja.AntrianBerlangsung = 0
 		return ja, eAm
 	}
 
 	eNa := m.Conn.Get(&ja.NoAntiran, `select no_antrian from tran_form_isian where status = 'On Progress' and id_pelayanan = $1`, idPelayanan)
 	if eNa != nil {
+		ja.NoAntiran = "-"
 		return ja, eNa
 	}
 

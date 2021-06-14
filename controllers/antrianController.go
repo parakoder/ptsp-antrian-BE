@@ -197,6 +197,7 @@ func (p *AntrianRepo) ExportAntrian(c *gin.Context) {
 	}
 
 	contentDisposition := fmt.Sprintf("attachment; filename=%s", f.Name())
+	c.Writer.Header().Set("Content-Description", "File Transfer")
 	c.Writer.Header().Set("Content-Disposition", contentDisposition)
 
 	if _, err := io.Copy(c.Writer, f); err != nil {
