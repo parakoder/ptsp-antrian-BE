@@ -132,13 +132,13 @@ func (p *AntrianRepo) GetTotalAntrian(c *gin.Context) {
 	c.Header("Access-Control-Allow-Origin", "*")
 	var responses models.ResponseJumlahAntrian
 	idPelayanan := c.Query("idPelayanan")
-	token := c.Request.Header.Get("Authorization")
+	// token := c.Request.Header.Get("Authorization")
 
-	_, errC := auth.ValidateToken(token)
-	if errC != nil {
-		c.AbortWithStatusJSON(400, handler.ErrorHandler(400, 422, errC.Error()))
-		return
-	}
+	// _, errC := auth.ValidateToken(token)
+	// if errC != nil {
+	// 	c.AbortWithStatusJSON(400, handler.ErrorHandler(400, 422, errC.Error()))
+	// 	return
+	// }
 	payload, err := p.repo.GetJumlahAntrian(idPelayanan)
 	if err != nil {
 		log.Println(err.Error())

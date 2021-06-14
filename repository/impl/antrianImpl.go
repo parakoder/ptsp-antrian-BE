@@ -352,8 +352,14 @@ func getJamKedatanganID() int {
 
 	end6 := "15:00"
 	endParse6, _ := time.Parse(layoutJam, end6)
-
 	jam6 := inTimeSpan(startParse6, endParse6, datesParse)
+	start7 := "21:00"
+	startParse7, _ := time.Parse(layoutJam, start7)
+
+	end7 := "23:00"
+	endParse7, _ := time.Parse(layoutJam, end7)
+
+	jam7 := inTimeSpan(startParse7, endParse7, datesParse)
 
 	if jam1 == true {
 		idJam = 1
@@ -367,6 +373,8 @@ func getJamKedatanganID() int {
 		idJam = 5
 	} else if jam6 == true {
 		idJam = 6
+	} else if jam7 == true {
+		idJam = 7
 	}
 
 	log.Println("INI DIA ID JAM NYA ", idJam)
