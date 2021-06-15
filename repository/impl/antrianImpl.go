@@ -119,25 +119,25 @@ func (m *mySQLAntrian) GetJumlahAntrian(idPelayanan string) (models.JumlahAntria
 	eTa := m.Conn.Get(&ja.TotalAntrian, `select count(id) from tran_form_isian where id_pelayanan = $1 and tanggal_Kedatangan =$2`, idPelayanan, dates)
 	if eTa != nil {
 		ja.TotalAntrian = 0
-		return ja, eTa
+		return ja, nil
 	}
 
 	eAs := m.Conn.Get(&ja.AntrianSelesai, `select count(id) from tran_form_isian where id_pelayanan = $1 AND status = 'Done' and tanggal_Kedatangan =$2`, idPelayanan, dates)
 	if eAs != nil {
 		ja.AntrianSelesai = 0
-		return ja, eAs
+		return ja, nil
 	}
 
 	eAm := m.Conn.Get(&ja.AntrianBerlangsung, `select count(id) from tran_form_isian where status = 'Waiting' and id_pelayanan = $1 and tanggal_Kedatangan =$2`, idPelayanan, dates)
 	if eAm != nil {
 		ja.AntrianBerlangsung = 0
-		return ja, eAm
+		return ja, nil
 	}
 
 	eNa := m.Conn.Get(&ja.NoAntiran, `select no_antrian from tran_form_isian where status = 'On Progress' and id_pelayanan = $1`, idPelayanan)
 	if eNa != nil {
 		ja.NoAntiran = "-"
-		return ja, eNa
+		return ja, nil
 	}
 
 	return ja, nil
@@ -202,7 +202,7 @@ func (m *mySQLAntrian) ExportAntrian(start string, end string) (string, error) {
 		arrX = append(arrX, x)
 	}
 	if arrX == nil {
-		return "",nil
+		return "", errors.New("data tidak tersedia")
 	}
 	path, _ := GenerateExlxs(arrX)
 	return path, nil

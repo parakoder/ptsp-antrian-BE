@@ -182,8 +182,7 @@ func (p *AntrianRepo) ExportAntrian(c *gin.Context) {
 	end := c.Query("end")
 	path, err := p.repo.ExportAntrian(start, end)
 	if err != nil {
-		log.Println(err.Error())
-		c.AbortWithStatusJSON(400, handler.ErrorHandler(400, 400, err.Error()))
+		c.JSON(200, handler.ErrorHandler(200, 204, err.Error() ))
 		return
 	}
 	// log.Println("PATH  ", path)
