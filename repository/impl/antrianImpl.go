@@ -111,7 +111,7 @@ func (m *mySQLAntrian) GetUserByID(userName string) (models.User, error) {
 }
 
 func (m *mySQLAntrian) GetJumlahAntrian(idPelayanan string) (models.JumlahAntrian, error) {
-
+	idJam := getJamKedatanganID()
 	var ja models.JumlahAntrian
 	dt := time.Now()
 	dates := dt.Format("2006.01.02")
@@ -128,7 +128,7 @@ func (m *mySQLAntrian) GetJumlahAntrian(idPelayanan string) (models.JumlahAntria
 		return ja, nil
 	}
 
-	eAm := m.Conn.Get(&ja.AntrianBerlangsung, `select count(id) from tran_form_isian where status = 'Waiting' and id_pelayanan = $1 and tanggal_Kedatangan =$2`, idPelayanan, dates)
+	eAm := m.Conn.Get(&ja.AntrianBerlangsung, `select count(id) from tran_form_isian where status = 'Waiting' and id_pelayanan = $1 and tanggal_Kedatangan =$2 an jam_kedatangan =3`, idPelayanan, dates, idJam)
 	if eAm != nil {
 		ja.AntrianBerlangsung = 0
 		return ja, nil
