@@ -202,7 +202,7 @@ func (m *mySQLAntrian) ExportAntrian(start string, end string) (string, error) {
 		arrX = append(arrX, x)
 	}
 	if arrX == nil {
-		return "", errors.New("Antrian tidak tersedia")
+		return "",nil
 	}
 	path, _ := GenerateExlxs(arrX)
 	return path, nil

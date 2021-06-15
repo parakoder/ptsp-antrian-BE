@@ -24,6 +24,15 @@ func ErrorHandler(status int, detailStatus int, errDesc string) Handler {
 
 	var handler Handler
 	switch status {
+
+	case 200 :
+		if detailStatus == 204 {
+			handler.Status = status
+			handler.DetailStatus = detailStatus
+			handler.MessageID = errDesc
+		}
+
+	
 	case 400:
 		if detailStatus == 400 {
 			handler.Status = status

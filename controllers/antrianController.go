@@ -183,13 +183,19 @@ func (p *AntrianRepo) ExportAntrian(c *gin.Context) {
 	path, err := p.repo.ExportAntrian(start, end)
 	if err != nil {
 		log.Println(err.Error())
-		c.AbortWithStatusJSON(c.Writer.Status(), handler.ErrorHandler(c.Writer.Status(), 400, err.Error()))
+		c.AbortWithStatusJSON(400, handler.ErrorHandler(400, 400, err.Error()))
+		return
+	}
+	// log.Println("PATH  ", path)
+	if len(path) == 0{
+		c.JSON(200, handler.ErrorHandler(200, 204, "Data antrian tidak tersedia"))
 		return
 	}
 
 	f, err := os.Open(path)
 	if f != nil {
 		defer f.Close()
+		
 	}
 	if err != nil {
 		http.Error(c.Writer, err.Error(), http.StatusInternalServerError)
