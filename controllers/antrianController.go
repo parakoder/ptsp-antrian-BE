@@ -182,11 +182,11 @@ func (p *AntrianRepo) ExportAntrian(c *gin.Context) {
 	end := c.Query("end")
 	path, err := p.repo.ExportAntrian(start, end)
 	if err != nil {
-		c.JSON(200, handler.ErrorHandler(200, 204, err.Error() ))
+		c.JSON(200, handler.ErrorHandler(200, 204, err.Error()))
 		return
 	}
 	// log.Println("PATH  ", path)
-	if len(path) == 0{
+	if len(path) == 0 {
 		c.JSON(200, handler.ErrorHandler(200, 204, "Data antrian tidak tersedia"))
 		return
 	}
@@ -194,7 +194,7 @@ func (p *AntrianRepo) ExportAntrian(c *gin.Context) {
 	f, err := os.Open(path)
 	if f != nil {
 		defer f.Close()
-		
+
 	}
 	if err != nil {
 		http.Error(c.Writer, err.Error(), http.StatusInternalServerError)
@@ -279,7 +279,13 @@ func (p *AntrianRepo) CallButton(c *gin.Context) {
 	noAntrian, bol, err := p.repo.CallButton(idPelayanan)
 	if err != nil {
 		// log.Println(err.Error())
-		c.AbortWithStatusJSON(c.Writer.Status(), handler.ErrorHandler(400, 400, err.Error()))
+		responses.Status = 200
+		responses.Message = "Success"
+		responses.Panggil = false
+		// responses.Data = panggil
+		c.Header("Content-Type", "application/json")
+		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+		json.NewEncoder(c.Writer).Encode(responses)
 		return
 	}
 
@@ -295,7 +301,7 @@ func (p *AntrianRepo) CallButton(c *gin.Context) {
 		angka2 = string(no[2])
 	}
 
-	panggil := []string{"bell", "nomorantrian", string(no[0]), string(no[1]) + angka2, "diloket", idPelayanan}
+	panggil := []string{"bell-start", "nomorantrian", string(no[0]), string(no[1]) + angka2, "diloket", idPelayanan, "bell-end"}
 	responses.Status = 200
 	responses.Message = "Success"
 	responses.Panggil = bol
