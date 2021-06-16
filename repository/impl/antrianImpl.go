@@ -512,9 +512,11 @@ func (m *mySQLAntrian) CallButton(idPelayanan string) (string, bool, error) {
 		if e != nil {
 			tx.Rollback()
 		}
-
+		pgl = true
 		tx.Commit()
 
+	} else {
+		pgl = false
 	}
 
 	log.Println("PARAM ", idPelayanan, idJam, currentDate)
