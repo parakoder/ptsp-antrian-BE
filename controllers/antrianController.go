@@ -132,38 +132,16 @@ func (p *AntrianRepo) GetTotalAntrian(c *gin.Context) {
 	c.Header("Access-Control-Allow-Origin", "*")
 	var responses models.ResponseJumlahAntrian
 	idPelayanan := c.Query("idPelayanan")
-	// token := c.Request.Header.Get("Authorization")
+	token := c.Request.Header.Get("Authorization")
 
-	// _, errC := auth.ValidateToken(token)
-	// if errC != nil {
-	// 	c.AbortWithStatusJSON(400, handler.ErrorHandler(400, 422, errC.Error()))
-	// 	return
-	// }
+	_, errC := auth.ValidateToken(token)
+	if errC != nil {
+		c.AbortWithStatusJSON(400, handler.ErrorHandler(400, 422, errC.Error()))
+		return
+	}
 	payload, err := p.repo.GetJumlahAntrian(idPelayanan)
 	if err != nil {
 		log.Println(err.Error())
-		return
-	}
-	responses.Status = 200
-	responses.Message = "Success"
-	responses.Data = payload
-	c.Header("Content-Type", "application/json")
-	c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
-	json.NewEncoder(c.Writer).Encode(responses)
-}
-
-func (p *AntrianRepo) DisplayAntrian(c *gin.Context) {
-	c.Header("Access-Control-Allow-Headers", "Content-type")
-	c.Header("Access-Control-Allow-Method", "POST, GET, OPTIONS, PUT, DELETE")
-	c.Header("Access-Control-Allow-Origin", "*")
-	var responses models.ResponseDisplayAntrian
-	// idPelayanan := c.Query("idPelayanan")
-	// userID := c.Query("userID")
-	// i, _ := strconv.Atoi(idPelayanan)
-	payload, err := p.repo.DisplayAntrian()
-	if err != nil {
-		log.Println(err.Error())
-		c.AbortWithStatusJSON(c.Writer.Status(), handler.ErrorHandler(c.Writer.Status(), 400, err.Error()))
 		return
 	}
 	responses.Status = 200
@@ -269,13 +247,13 @@ func (p *AntrianRepo) CallButton(c *gin.Context) {
 	c.Header("Access-Control-Allow-Origin", "*")
 	idPelayanan := c.Query("idPelayanan")
 	var responses models.ResponseCall
-	// token := c.Request.Header.Get("Authorization")
+	token := c.Request.Header.Get("Authorization")
 
-	// _, errC := auth.ValidateToken(token)
-	// if errC != nil {
-	// 	c.AbortWithStatusJSON(400, handler.ErrorHandler(400, 422, errC.Error()))
-	// 	return
-	// }
+	_, errC := auth.ValidateToken(token)
+	if errC != nil {
+		c.AbortWithStatusJSON(400, handler.ErrorHandler(400, 422, errC.Error()))
+		return
+	}
 	noAntrian, bol, err := p.repo.CallButton(idPelayanan)
 	if err != nil {
 		// log.Println(err.Error())

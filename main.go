@@ -79,7 +79,7 @@ func main() {
 			a.GET("/queue-table", aController.GetAntrianList)
 			a.GET("/profile", aController.GetUserByID)
 			a.GET("/card", aController.GetTotalAntrian)
-			a.GET("/display", aController.DisplayAntrian)
+			// a.GET("/display", aController.DisplayAntrian)
 			a.GET("/export", aController.ExportAntrian)
 			a.PUT("/next", aController.NextButton)
 			a.GET("/call", aController.CallButton)

@@ -35,7 +35,7 @@ func (m *mySQLAntrian) SignIn(params map[string]string) (string, error) {
 		return "", e
 	}
 
-	defer q.Close()
+	// defer q.Close()
 	for q.Next() {
 		if err := q.StructScan(&User); err != nil {
 			return "", err
@@ -143,27 +143,27 @@ func (m *mySQLAntrian) GetJumlahAntrian(idPelayanan string) (models.JumlahAntria
 	return ja, nil
 }
 
-func (m *mySQLAntrian) DisplayAntrian() ([]models.DisplayAntrian, error) {
-	var arrDisplay []models.DisplayAntrian
+// func (m *mySQLAntrian) DisplayAntrian() ([]models.DisplayAntrian, error) {
+// 	var arrDisplay []models.DisplayAntrian
 
-	q, e := m.Conn.Queryx(`select mp.nama as loket, t.no_antrian as antrian from tran_form_isian t 
-	left join mst_pelayanan mp on mp.id = t.id_pelayanan
-	where status = 'on progress'`)
-	if e != nil {
-		return nil, e
-	}
-	defer q.Close()
-	for q.Next() {
-		var da models.DisplayAntrian
-		eScan := q.StructScan(&da)
-		if eScan != nil {
-			return nil, eScan
-		}
-		arrDisplay = append(arrDisplay, da)
-	}
+// 	q, e := m.Conn.Queryx(`select mp.nama as loket, t.no_antrian as antrian from tran_form_isian t 
+// 	left join mst_pelayanan mp on mp.id = t.id_pelayanan
+// 	where status = 'on progress'`)
+// 	if e != nil {
+// 		return nil, e
+// 	}
+// 	defer q.Close()
+// 	for q.Next() {
+// 		var da models.DisplayAntrian
+// 		eScan := q.StructScan(&da)
+// 		if eScan != nil {
+// 			return nil, eScan
+// 		}
+// 		arrDisplay = append(arrDisplay, da)
+// 	}
 
-	return arrDisplay, nil
-}
+// 	return arrDisplay, nil
+// }
 
 func (m *mySQLAntrian) ExportAntrian(start string, end string) (string, error) {
 	var arrX []models.ExportAntrian
@@ -280,6 +280,7 @@ func (m *mySQLAntrian) GetJamKedatangan() int {
 	if err != nil {
 		log.Panicln(err)
 	}
+	defer rows.Close()
 	for rows.Next() {
 		err := rows.Scan(&start, &end)
 		if err != nil {
@@ -476,6 +477,7 @@ func (m *mySQLAntrian) NextAntrian(idPelayanan string) error {
 
 	_, errExOP := tx.Exec(`UPDATE tran_form_isian SET status = 'Done', lama_pelayanan =$2 WHERE id =$1`, Onprogress.ID, lamaPelayanan)
 	if errExOP != nil {
+		tx.Rollback()
 		return errExOP
 	}
 
@@ -504,19 +506,19 @@ func (m *mySQLAntrian) CallButton(idPelayanan string) (string, bool, error) {
 	dt := time.Now()
 	currentDate := dt.Format("2006-01-02")
 	var pgl bool
-	tx := m.Conn.MustBegin()
+	// tx := m.Conn.MustBegin()
 
-	panggil := m.Conn.Get(&pgl, `SELECT actived FROM panggil where actived =  true`)
-	if panggil != nil {
-		_, e := tx.Exec(`UPDATE panggil SET actived = true where id = $1`, i)
+	errs := m.Conn.Get(&pgl, `SELECT actived FROM panggil where actived =  true`)
+
+	if errs != nil {
+		log.Println(errs)
+	}
+	if pgl == false {
+			_, e := m.Conn.Exec(`UPDATE panggil SET actived = true where id = $1`, i)
 		if e != nil {
-			tx.Rollback()
+			log.Println(e.Error())
 		}
 		pgl = true
-		tx.Commit()
-
-	} else {
-		pgl = false
 	}
 
 	log.Println("PARAM ", idPelayanan, idJam, currentDate)
