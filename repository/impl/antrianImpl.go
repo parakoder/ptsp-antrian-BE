@@ -134,7 +134,7 @@ func (m *mySQLAntrian) GetJumlahAntrian(idPelayanan string) (models.JumlahAntria
 		// return ja, nil
 	}
 	log.Println("IDPELAYANAN ", idPelayanan)
-	eNa := m.Conn.Get(&ja.NoAntiran, `select no_antrian from tran_form_isian where status = 'On Progress' and id_pelayanan = $1`, idPelayanan)
+	eNa := m.Conn.Get(&ja.NoAntiran, `select no_antrian from tran_form_isian where status = 'On Progress' and id_pelayanan = $1 and jam_kedatangan =$2`, idPelayanan, idJam)
 	if eNa != nil {
 		ja.NoAntiran = "-"
 		return ja, nil
