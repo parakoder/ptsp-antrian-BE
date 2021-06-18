@@ -116,7 +116,7 @@ func (m *mySQLAntrian) GetJumlahAntrian(idPelayanan string) (models.JumlahAntria
 	dt := time.Now()
 	dates := dt.Format("2006.01.02")
 
-	eTa := m.Conn.Get(&ja.TotalAntrian, `select count(id) from tran_form_isian where id_pelayanan = $1 and tanggal_Kedatangan =$2`, idPelayanan, dates)
+	eTa := m.Conn.Get(&ja.TotalAntrian, `select count(id) from tran_form_isian where id_pelayanan = $1 and tanggal_Kedatangan =$2 and jam_kedatangan =$3`, idPelayanan, dates, idJam)
 	if eTa != nil {
 		ja.TotalAntrian = 0
 		// return ja, nil
