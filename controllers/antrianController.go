@@ -188,13 +188,13 @@ func (p *AntrianRepo) ExportAntrian(c *gin.Context) {
 		return
 	}
 
-	c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
-	c.Header("Content-Type", "application/json")
-	c.JSON(200, gin.H{
-		"status":     200,
-		"message_id": "Suskes dowmload antrian",
-		// "vendorID":   q,
-	})
+	// c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+	// c.Header("Content-Type", "application/json")
+	// c.JSON(200, gin.H{
+	// 	"status":     200,
+	// 	"message_id": "Suskes dowmload antrian",
+	// 	// "vendorID":   q,
+	// })
 }
 
 func (p *AntrianRepo) NextButton(c *gin.Context) {
