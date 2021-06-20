@@ -276,10 +276,10 @@ func (p *AntrianRepo) CallButton(c *gin.Context) {
 	log.Println(count)
 	var angka2 string
 	if count == 3 {
-		angka2 = string(no[2])
+		angka2 = string(no[3])
 	}
 
-	panggil := []string{"bell-start", "nomorantrian", string(no[0]), string(no[1]) + angka2, "diloket", idPelayanan, "bell-end"}
+	panggil := []string{"bell-start", "nomorantrian", string(no[0]), string(no[2]) + angka2, "diloket", idPelayanan, "bell-end"}
 	responses.Status = 200
 	responses.Message = "Success"
 	responses.Panggil = bol
