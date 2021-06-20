@@ -146,7 +146,7 @@ func (m *mySQLAntrian) GetJumlahAntrian(idPelayanan string) (models.JumlahAntria
 // func (m *mySQLAntrian) DisplayAntrian() ([]models.DisplayAntrian, error) {
 // 	var arrDisplay []models.DisplayAntrian
 
-// 	q, e := m.Conn.Queryx(`select mp.nama as loket, t.no_antrian as antrian from tran_form_isian t 
+// 	q, e := m.Conn.Queryx(`select mp.nama as loket, t.no_antrian as antrian from tran_form_isian t
 // 	left join mst_pelayanan mp on mp.id = t.id_pelayanan
 // 	where status = 'on progress'`)
 // 	if e != nil {
@@ -505,27 +505,32 @@ func (m *mySQLAntrian) CallButton(idPelayanan string) (string, bool, error) {
 	i, _ := strconv.Atoi(idPelayanan)
 	dt := time.Now()
 	currentDate := dt.Format("2006-01-02")
+	var idPgl int
 	var pgl bool
 	// tx := m.Conn.MustBegin()
 
-	errs := m.Conn.Get(&pgl, `SELECT actived FROM panggil where actived =  true`)
+	errs := m.Conn.Get(&idPgl, `SELECT id FROM panggil where actived =  true`)
 
 	if errs != nil {
 		log.Println(errs)
 	}
-	if pgl == false {
-			_, e := m.Conn.Exec(`UPDATE panggil SET actived = true where id = $1`, i)
+
+	log.Println("idPGL ", idPgl)
+	if idPgl == 0 {
+		_, e := m.Conn.Exec(`UPDATE panggil SET actived = true where id = $1`, i)
 		if e != nil {
 			log.Println(e.Error())
 		}
 		pgl = true
+	} else {
+		pgl = false
 	}
 
-	log.Println("PARAM ", idPelayanan, idJam, currentDate)
+	// log.Println("PARAM ", idPelayanan, idJam, currentDate)
 	err := m.Conn.Get(&NoAntiran, `SELECT no_antrian from tran_form_isian where status = 'On Progress' AND id_pelayanan = $1  AND jam_kedatangan = $2 AND tanggal_kedatangan =$3`, idPelayanan, idJam, currentDate)
 	if err != nil {
 		return "", pgl, err
 	}
-	log.Println("NO ANTRIAN ", NoAntiran)
+	// log.Println("NO ANTRIAN ", NoAntiran)
 	return NoAntiran, pgl, nil
 }
