@@ -275,7 +275,7 @@ func (p *AntrianRepo) CallButton(c *gin.Context) {
 	}
 	log.Println(count)
 	var angka2 string
-	if count == 3 {
+	if count == 4 {
 		angka2 = string(no[3])
 	}
 
