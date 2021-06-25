@@ -354,7 +354,8 @@ func getJamKedatanganID() int {
 	end6 := "15:00"
 	endParse6, _ := time.Parse(layoutJam, end6)
 	jam6 := inTimeSpan(startParse6, endParse6, datesParse)
-	start7 := "21:00"
+
+	start7 := "15:00"
 	startParse7, _ := time.Parse(layoutJam, start7)
 
 	end7 := "23:00"
@@ -404,6 +405,8 @@ func getMinute(idJam int) float64 {
 		jamKdtng = "13:00"
 	case 6:
 		jamKdtng = "14:00"
+	case 7:
+		jamKdtng = "15:00"
 	}
 
 	pTime1, _ := time.Parse(layoutJam, jamKdtng)
