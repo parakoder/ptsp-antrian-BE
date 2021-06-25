@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"time"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/joho/godotenv"
@@ -16,7 +17,7 @@ type DB struct {
 
 var dbConn = &DB{}
 
-func ConnectSQL() (*DB, error){
+func ConnectSQL() (*DB, error) {
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatal("Error Loading .env file")
@@ -33,14 +34,15 @@ func ConnectSQL() (*DB, error){
 		hostName,
 		hostPort,
 		dbName)
-		// log.Println("DB COnn ", d)
-		d, err := sqlx.Open("postgres", url)
-		if err != nil {
-			panic(err)
-		}
-		d.SetMaxIdleConns(10)
-		d.SetMaxOpenConns(10)
-		
-		dbConn.SQL = d
-		return dbConn, err
+	// log.Println("DB COnn ", d)
+	d, err := sqlx.Open("postgres", url)
+	if err != nil {
+		panic(err)
+	}
+	d.SetMaxIdleConns(10)
+	d.SetMaxOpenConns(10)
+	d.SetConnMaxLifetime(1 * time.Minute)
+
+	dbConn.SQL = d
+	return dbConn, err
 }

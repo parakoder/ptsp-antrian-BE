@@ -35,7 +35,7 @@ func (m *mySQLAntrian) SignIn(params map[string]string) (string, error) {
 		return "", e
 	}
 
-	// defer q.Close()
+	defer q.Close()
 	for q.Next() {
 		if err := q.StructScan(&User); err != nil {
 			return "", err
