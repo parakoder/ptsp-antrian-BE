@@ -40,6 +40,7 @@ type JumlahAntrian struct {
 	// AntrianMenunggu int `json:"antrianMenunggu"`
 	AntrianBerlangsung int    `json:"antrianBerlangsung"`
 	NoAntiran          string `json:"noAntrian"`
+	NoAntiranOff          string `json:"noAntrianOff"`
 }
 type ResponseJumlahAntrian struct {
 	Status  int           `json:"status"`

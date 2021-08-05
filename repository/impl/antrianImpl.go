@@ -80,14 +80,12 @@ func (m *mySQLAntrian) AntrianList(idPelayanan string) ([]models.AntrianList, er
 	q, err := m.Conn.Queryx(`SELECT no_antrian, mp.nama as loket, rjk.keterangan as jam_kedatangan, jam_dilayani, lama_menunggu, lama_pelayanan FROM tran_form_isian t
 	LEFT JOIN mst_pelayanan mp on mp.id = t.id_pelayanan
 	LEFT JOIN ref_jam_kedatangan rjk on rjk.jam = t.jam_kedatangan
-	WHERE id_pelayanan = $1 and tanggal_kedatangan = $2 and status = 'Done'order by jam_kedatangan DESC`, idPelayanan, dates)
+	WHERE id_pelayanan = $1 and tanggal_kedatangan = $2 and status = 'Done' order by jam_kedatangan DESC`, idPelayanan, dates)
 	if err != nil {
 		return nil, err
 	}
-	// log.Println("coyyy masuk", q)
 	defer q.Close()
 	for q.Next() {
-		// log.Println("coyyy masuk")
 		var a models.AntrianList
 		errScan := q.StructScan(&a)
 
@@ -133,10 +131,14 @@ func (m *mySQLAntrian) GetJumlahAntrian(idPelayanan string) (models.JumlahAntria
 		ja.AntrianBerlangsung = 0
 		// return ja, nil
 	}
-	log.Println("IDPELAYANAN ", idPelayanan)
-	eNa := m.Conn.Get(&ja.NoAntiran, `select no_antrian from tran_form_isian where status = 'On Progress' and id_pelayanan = $1 and jam_kedatangan =$2`, idPelayanan, idJam)
+	eNa := m.Conn.Get(&ja.NoAntiran, `select no_antrian from tran_form_isian where status = 'On Progress' and id_pelayanan = $1 and jam_kedatangan =$2 and metode = 'online'`, idPelayanan, idJam)
 	if eNa != nil {
 		ja.NoAntiran = "-"
+		return ja, nil
+	}
+	eNaOff := m.Conn.Get(&ja.NoAntiranOff, `select no_antrian from tran_form_isian where status = 'On Progress' and id_pelayanan = $1 and jam_kedatangan =$2 and metode = 'offline'`, idPelayanan, idJam)
+	if eNaOff != nil {
+		ja.NoAntiranOff = "-"
 		return ja, nil
 	}
 
@@ -306,7 +308,7 @@ func getJamKedatanganID() int {
 	start1 := "08:00"
 	startParse1, _ := time.Parse(layoutJam, start1)
 
-	end1 := "09:00"
+	end1 := "24:00"
 	endParse1, _ := time.Parse(layoutJam, end1)
 
 	jam1 := inTimeSpan(startParse1, endParse1, datesParse)
@@ -425,16 +427,13 @@ type OnProgres struct {
 func (m *mySQLAntrian) NextAntrian(idPelayanan string) error {
 	idJam := getJamKedatanganID()
 	var idAntWaiting int
-	// var idAntOnProgress int
 	Onprogress := OnProgres{}
-	// var jamDilayani string
 	iPelayanan, _ := strconv.Atoi(idPelayanan)
 	layoutJam := "15:04"
 	dt := time.Now()
 	currentDate := dt.Format("2006-01-02")
 	currentTime := dt.Format("15:04")
 	lamaMenunggu := getMinute(idJam)
-	// lamaLayanan := dt.Format("15:04")
 	log.Println("menit nya  ", lamaMenunggu)
 	log.Println("tanggal sekarang  ", currentDate)
 
@@ -447,9 +446,10 @@ func (m *mySQLAntrian) NextAntrian(idPelayanan string) error {
 	and status = 'Waiting'
 	order by no_antrian ASC
 	limit 1`, idJam, iPelayanan, currentDate)
-
+	log.Println("PARAMS ", idJam, iPelayanan, currentDate)
 	if err != nil {
 		log.Println("ERROR DI GET id waiting", err)
+		// return errors.New()
 		// return err
 	}
 
@@ -473,8 +473,6 @@ func (m *mySQLAntrian) NextAntrian(idPelayanan string) error {
 
 	jamSkrng, _ := time.Parse(layoutJam, currentTime)
 	jamDilayani, _ := time.Parse(time.RFC3339, Onprogress.Jam_dilayani)
-	// log.Println("jam dilayani di ", Onprogress.Jam_dilayani)
-	// log.Println("jam skarang di ", jamSkrng)
 	lamaPelayanan := jamSkrng.Sub(jamDilayani).Minutes()
 	log.Println("lama di layanai ", lamaPelayanan, "menit")
 

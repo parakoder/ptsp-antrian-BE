@@ -53,7 +53,7 @@ import (
 // }
 
 func main() {
-	if err := godotenv.Load(".env.prod"); err != nil {
+	if err := godotenv.Load(".env"); err != nil {
 		panic(".env not exists")
 	} else {
 
