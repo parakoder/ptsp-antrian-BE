@@ -221,6 +221,30 @@ func (p *AntrianRepo) NextButton(c *gin.Context) {
 	})
 }
 
+func (p *AntrianRepo) NextButtonOffline(c *gin.Context) {
+	c.Header("Access-Control-Allow-Headers", "Content-type")
+	c.Header("Access-Control-Allow-Method", "POST, GET, OPTIONS, PUT, DELETE")
+	c.Header("Access-Control-Allow-Origin", "*")
+	// var responses models.ResponseDisplayAntrian
+	idPelayanan := c.Query("idPelayanan")
+	// userID := c.Query("userID")
+	// i, _ := strconv.Atoi(idPelayanan)
+	err := p.repo.NextAntrianOffline(idPelayanan)
+	if err != nil {
+		// log.Println(err.Error())
+		c.AbortWithStatusJSON(c.Writer.Status(), handler.ErrorHandler(400, 400, err.Error()))
+		return
+	}
+
+	c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+	c.Header("Content-Type", "application/json")
+	c.JSON(200, gin.H{
+		"status":  200,
+		"message": "Suskes update antrian",
+		// "vendorID":   q,
+	})
+}
+
 func (p *AntrianRepo) Scheduler(c *gin.Context) {
 	c.Header("Access-Control-Allow-Headers", "Content-type")
 	c.Header("Access-Control-Allow-Method", "POST, GET, OPTIONS, PUT, DELETE")
@@ -288,3 +312,53 @@ func (p *AntrianRepo) CallButton(c *gin.Context) {
 	c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
 	json.NewEncoder(c.Writer).Encode(responses)
 }
+
+
+func (p *AntrianRepo) CallButtonOffline(c *gin.Context) {
+	c.Header("Access-Control-Allow-Headers", "Content-type")
+	c.Header("Access-Control-Allow-Method", "POST, GET, OPTIONS, PUT, DELETE")
+	c.Header("Access-Control-Allow-Origin", "*")
+	idPelayanan := c.Query("idPelayanan")
+	var responses models.ResponseCall
+	token := c.Request.Header.Get("Authorization")
+
+	_, errC := auth.ValidateToken(token)
+	if errC != nil {
+		c.AbortWithStatusJSON(400, handler.ErrorHandler(400, 422, errC.Error()))
+		return
+	}
+	noAntrian, bol, err := p.repo.CallButtonOffline(idPelayanan)
+	if err != nil {
+		// log.Println(err.Error())
+		responses.Status = 200
+		responses.Message = "Success"
+		responses.Panggil = false
+		// responses.Data = panggil
+		c.Header("Content-Type", "application/json")
+		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+		json.NewEncoder(c.Writer).Encode(responses)
+		return
+	}
+
+	no := []rune(noAntrian)
+	count := 0
+	for _, angk := range no {
+		count += 1
+		log.Println(angk)
+	}
+	log.Println(count)
+	var angka2 string
+	if count == 4 {
+		angka2 = string(no[3])
+	}
+
+	panggil := []string{"bell-start", "nomorantrian", string(no[0]), string(no[2]) + angka2, "diloket", idPelayanan, "bell-end"}
+	responses.Status = 200
+	responses.Message = "Success"
+	responses.Panggil = bol
+	responses.Data = panggil
+	c.Header("Content-Type", "application/json")
+	c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+	json.NewEncoder(c.Writer).Encode(responses)
+}
+

@@ -82,7 +82,9 @@ func main() {
 			// a.GET("/display", aController.DisplayAntrian)
 			a.GET("/export", aController.ExportAntrian)
 			a.PUT("/next", aController.NextButton)
+			a.PUT("/next-offline", aController.NextButtonOffline)
 			a.GET("/call", aController.CallButton)
+			a.GET("/call-offline", aController.CallButtonOffline)
 			a.POST("/signin", aController.SignIn)
 		}
 

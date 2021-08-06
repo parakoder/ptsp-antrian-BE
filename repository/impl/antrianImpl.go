@@ -444,6 +444,7 @@ func (m *mySQLAntrian) NextAntrian(idPelayanan string) error {
 	and jam_kedatangan = $1
 	and id_pelayanan = $2
 	and status = 'Waiting'
+	and metode = 'online'
 	order by no_antrian ASC
 	limit 1`, idJam, iPelayanan, currentDate)
 	log.Println("PARAMS ", idJam, iPelayanan, currentDate)
@@ -458,6 +459,72 @@ func (m *mySQLAntrian) NextAntrian(idPelayanan string) error {
 	and jam_kedatangan = $2
 	and id_pelayanan = $1
 	and status = 'On Progress'
+	and metode = 'online'
+	order by no_antrian asc limit 1`, idPelayanan, idJam, currentDate)
+
+	if errOp != nil {
+		log.Println("ERROR DI GET id done ", errOp)
+		// return err
+	}
+
+	_, errEx := tx.Exec(`UPDATE tran_form_isian SET status = 'On Progress', jam_dilayani = $2, lama_menunggu = $3 WHERE id =$1`, idAntWaiting, currentTime, lamaMenunggu)
+	if errEx != nil {
+		tx.Rollback()
+		return errEx
+	}
+
+	jamSkrng, _ := time.Parse(layoutJam, currentTime)
+	jamDilayani, _ := time.Parse(time.RFC3339, Onprogress.Jam_dilayani)
+	lamaPelayanan := jamSkrng.Sub(jamDilayani).Minutes()
+	log.Println("lama di layanai ", lamaPelayanan, "menit")
+
+	_, errExOP := tx.Exec(`UPDATE tran_form_isian SET status = 'Done', lama_pelayanan =$2 WHERE id =$1`, Onprogress.ID, lamaPelayanan)
+	if errExOP != nil {
+		tx.Rollback()
+		return errExOP
+	}
+
+	tx.Commit()
+
+	return nil
+}
+
+func (m *mySQLAntrian) NextAntrianOffline(idPelayanan string) error {
+	idJam := getJamKedatanganID()
+	var idAntWaiting int
+	Onprogress := OnProgres{}
+	iPelayanan, _ := strconv.Atoi(idPelayanan)
+	layoutJam := "15:04"
+	dt := time.Now()
+	currentDate := dt.Format("2006-01-02")
+	currentTime := dt.Format("15:04")
+	lamaMenunggu := getMinute(idJam)
+	log.Println("menit nya  ", lamaMenunggu)
+	log.Println("tanggal sekarang  ", currentDate)
+
+	tx := m.Conn.MustBegin()
+
+	err := m.Conn.Get(&idAntWaiting, `select id from tran_form_isian
+	where tanggal_kedatangan = $3
+	and jam_kedatangan = $1
+	and id_pelayanan = $2
+	and status = 'Waiting'
+	and metode = 'offline'
+	order by no_antrian ASC
+	limit 1`, idJam, iPelayanan, currentDate)
+	log.Println("PARAMS ", idJam, iPelayanan, currentDate)
+	if err != nil {
+		log.Println("ERROR DI GET id waiting", err)
+		// return errors.New()
+		// return err
+	}
+
+	errOp := m.Conn.Get(&Onprogress, `select id, jam_dilayani from tran_form_isian
+	where tanggal_kedatangan = $3
+	and jam_kedatangan = $2
+	and id_pelayanan = $1
+	and status = 'On Progress'
+	and metode = 'offline'
 	order by no_antrian asc limit 1`, idPelayanan, idJam, currentDate)
 
 	if errOp != nil {
@@ -528,7 +595,43 @@ func (m *mySQLAntrian) CallButton(idPelayanan string) (string, bool, error) {
 	}
 
 	// log.Println("PARAM ", idPelayanan, idJam, currentDate)
-	err := m.Conn.Get(&NoAntiran, `SELECT no_antrian from tran_form_isian where status = 'On Progress' AND id_pelayanan = $1  AND jam_kedatangan = $2 AND tanggal_kedatangan =$3`, idPelayanan, idJam, currentDate)
+	err := m.Conn.Get(&NoAntiran, `SELECT no_antrian from tran_form_isian where status = 'On Progress' AND id_pelayanan = $1  AND jam_kedatangan = $2 AND tanggal_kedatangan =$3 AND metode = 'online'`, idPelayanan, idJam, currentDate)
+	if err != nil {
+		return "", pgl, err
+	}
+	// log.Println("NO ANTRIAN ", NoAntiran)
+	return NoAntiran, pgl, nil
+}
+
+func (m *mySQLAntrian) CallButtonOffline(idPelayanan string) (string, bool, error) {
+	idJam := getJamKedatanganID()
+	var NoAntiran string
+	i, _ := strconv.Atoi(idPelayanan)
+	dt := time.Now()
+	currentDate := dt.Format("2006-01-02")
+	var idPgl int
+	var pgl bool
+	// tx := m.Conn.MustBegin()
+
+	errs := m.Conn.Get(&idPgl, `SELECT id FROM panggil where actived =  true`)
+
+	if errs != nil {
+		log.Println(errs)
+	}
+
+	log.Println("idPGL ", idPgl)
+	if idPgl == 0 {
+		_, e := m.Conn.Exec(`UPDATE panggil SET actived = true where id = $1`, i)
+		if e != nil {
+			log.Println(e.Error())
+		}
+		pgl = true
+	} else {
+		pgl = false
+	}
+
+	// log.Println("PARAM ", idPelayanan, idJam, currentDate)
+	err := m.Conn.Get(&NoAntiran, `SELECT no_antrian from tran_form_isian where status = 'On Progress' AND id_pelayanan = $1  AND jam_kedatangan = $2 AND tanggal_kedatangan =$3 AND metode = 'offline'`, idPelayanan, idJam, currentDate)
 	if err != nil {
 		return "", pgl, err
 	}
