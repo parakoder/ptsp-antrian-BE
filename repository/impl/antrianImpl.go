@@ -114,6 +114,8 @@ func (m *mySQLAntrian) GetJumlahAntrian(idPelayanan string) (models.JumlahAntria
 	dt := time.Now()
 	dates := dt.Format("2006.01.02")
 
+	log.Println("PARAM ", idPelayanan, idJam)
+
 	eTa := m.Conn.Get(&ja.TotalAntrian, `select count(id) from tran_form_isian where id_pelayanan = $1 and tanggal_Kedatangan =$2 and jam_kedatangan =$3`, idPelayanan, dates, idJam)
 	if eTa != nil {
 		ja.TotalAntrian = 0
@@ -134,14 +136,14 @@ func (m *mySQLAntrian) GetJumlahAntrian(idPelayanan string) (models.JumlahAntria
 	eNa := m.Conn.Get(&ja.NoAntiran, `select no_antrian from tran_form_isian where status = 'On Progress' and id_pelayanan = $1 and jam_kedatangan =$2 and metode = 'online'`, idPelayanan, idJam)
 	if eNa != nil {
 		ja.NoAntiran = "-"
-		return ja, nil
+		// return ja, nil
 	}
 	eNaOff := m.Conn.Get(&ja.NoAntiranOff, `select no_antrian from tran_form_isian where status = 'On Progress' and id_pelayanan = $1 and jam_kedatangan =$2 and metode = 'offline'`, idPelayanan, idJam)
 	if eNaOff != nil {
 		ja.NoAntiranOff = "-"
-		return ja, nil
+		// return ja, nil
 	}
-
+	log.Println("RESULT ", ja.NoAntiranOff)
 	return ja, nil
 }
 
@@ -298,7 +300,6 @@ var idJam int
 func getJamKedatanganID() int {
 	// tx := m.Conn.MustBegin()
 	// var jam2 bool
-	fmt.Println("TES")
 	dt := time.Now()
 	layoutJam := "15:04"
 	dates := dt.Format("15:04")
