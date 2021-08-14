@@ -112,9 +112,9 @@ func (m *mySQLAntrian) GetJumlahAntrian(idPelayanan string) (models.JumlahAntria
 	idJam := getJamKedatanganID()
 	var ja models.JumlahAntrian
 	dt := time.Now()
-	dates := dt.Format("2006.01.02")
+	dates := dt.Format("2006-01-02")
 
-	log.Println("PARAM ", idPelayanan, idJam)
+	log.Println("PARAM ", idPelayanan, idJam, dates)
 
 	eTa := m.Conn.Get(&ja.TotalAntrian, `select count(id) from tran_form_isian where id_pelayanan = $1 and tanggal_Kedatangan =$2 and jam_kedatangan =$3`, idPelayanan, dates, idJam)
 	if eTa != nil {
@@ -133,17 +133,18 @@ func (m *mySQLAntrian) GetJumlahAntrian(idPelayanan string) (models.JumlahAntria
 		ja.AntrianBerlangsung = 0
 		// return ja, nil
 	}
-	eNa := m.Conn.Get(&ja.NoAntiran, `select no_antrian from tran_form_isian where status = 'On Progress' and id_pelayanan = $1 and jam_kedatangan =$2 and metode = 'online'`, idPelayanan, idJam)
+	eNa := m.Conn.Get(&ja.NoAntiran, `select no_antrian from tran_form_isian where status = 'On Progress' and id_pelayanan = $1 and jam_kedatangan =$2 and tanggal_kedatangan =$3 and metode = 'online'`, idPelayanan, idJam, dates)
 	if eNa != nil {
 		ja.NoAntiran = "-"
 		// return ja, nil
 	}
-	eNaOff := m.Conn.Get(&ja.NoAntiranOff, `select no_antrian from tran_form_isian where status = 'On Progress' and id_pelayanan = $1 and jam_kedatangan =$2 and metode = 'offline'`, idPelayanan, idJam)
+	eNaOff := m.Conn.Get(&ja.NoAntiranOff, `select no_antrian from tran_form_isian where status = 'On Progress' and id_pelayanan = $1 and jam_kedatangan =$2 and tanggal_kedatangan =$3 and metode = 'offline'`, idPelayanan, idJam, dates)
 	if eNaOff != nil {
 		ja.NoAntiranOff = "-"
 		// return ja, nil
 	}
-	log.Println("RESULT ", ja.NoAntiranOff)
+	log.Println("RESULT ", ja.NoAntiran)
+	log.Println("RESULT OFF ", ja.NoAntiranOff)
 	return ja, nil
 }
 
