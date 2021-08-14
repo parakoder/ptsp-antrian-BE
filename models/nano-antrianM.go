@@ -35,12 +35,11 @@ type User struct {
 }
 
 type JumlahAntrian struct {
-	TotalAntrian   int `json:"totalAntrian"`
-	AntrianSelesai int `json:"antrianSelesai"`
-	// AntrianMenunggu int `json:"antrianMenunggu"`
+	TotalAntrian       int    `json:"totalAntrian"`
+	AntrianSelesai     int    `json:"antrianSelesai"`
 	AntrianBerlangsung int    `json:"antrianBerlangsung"`
 	NoAntiran          string `json:"noAntrian"`
-	NoAntiranOff          string `json:"noAntrianOff"`
+	NoAntiranOff       string `json:"noAntrianOff"`
 }
 type ResponseJumlahAntrian struct {
 	Status  int           `json:"status"`

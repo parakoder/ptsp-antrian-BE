@@ -607,12 +607,30 @@ func (m *mySQLAntrian) CallButton(idPelayanan string) (string, bool, error) {
 func (m *mySQLAntrian) CallButtonOffline(idPelayanan string) (string, bool, error) {
 	idJam := getJamKedatanganID()
 	var NoAntiran string
-	i, _ := strconv.Atoi(idPelayanan)
+	// i, _ := strconv.Atoi(idPelayanan)
 	dt := time.Now()
 	currentDate := dt.Format("2006-01-02")
 	var idPgl int
 	var pgl bool
+	var idPlyn string
 	// tx := m.Conn.MustBegin()
+
+	switch idPelayanan {
+	case "1":
+		idPlyn = "8"
+	case "2":
+		idPlyn = "9"
+	case "3":
+		idPlyn = "10"
+	case "4":
+		idPlyn = "11"
+	case "5":
+		idPlyn = "12"
+	case "6":
+		idPlyn = "13"
+	case "7":
+		idPlyn = "14"
+	}
 
 	errs := m.Conn.Get(&idPgl, `SELECT id FROM panggil where actived =  true`)
 
@@ -622,7 +640,7 @@ func (m *mySQLAntrian) CallButtonOffline(idPelayanan string) (string, bool, erro
 
 	log.Println("idPGL ", idPgl)
 	if idPgl == 0 {
-		_, e := m.Conn.Exec(`UPDATE panggil SET actived = true where id = $1`, i)
+		_, e := m.Conn.Exec(`UPDATE panggil SET actived = true where id = $1`, idPlyn)
 		if e != nil {
 			log.Println(e.Error())
 		}
