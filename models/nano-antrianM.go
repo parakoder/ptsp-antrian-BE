@@ -97,17 +97,17 @@ type DetailUser struct {
 
 type ExportAntrian struct {
 	Nama_lengkap       string
-	No_identitas       string
-	Jenis_kelamin      string
-	Alamat             string
-	Email              string
-	No_hp              string
+	No_identitas       *string
+	Jenis_kelamin      *string
+	Alamat             *string
+	Email              *string
+	No_hp              *string
 	Tanggal_Kedatangan string
 	Loket              string
 	Jam_Kedatangan     string
 	Status             string
-	Lama_menunggu      int
-	Lama_pelayanan     int
+	Lama_menunggu      *int
+	Lama_pelayanan     *int
 	Jam_Dilayani       *time.Time
 }
 

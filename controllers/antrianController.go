@@ -180,7 +180,7 @@ func (p *AntrianRepo) ExportAntrian(c *gin.Context) {
 	}
 
 	contentDisposition := fmt.Sprintf("attachment; filename=%s", f.Name())
-	c.Writer.Header().Set("Content-Description", "File Transfer")
+	// c.Writer.Header().Set("Content-Description", "File Transfer")
 	c.Writer.Header().Set("Content-Disposition", contentDisposition)
 
 	if _, err := io.Copy(c.Writer, f); err != nil {
@@ -313,7 +313,6 @@ func (p *AntrianRepo) CallButton(c *gin.Context) {
 	json.NewEncoder(c.Writer).Encode(responses)
 }
 
-
 func (p *AntrianRepo) CallButtonOffline(c *gin.Context) {
 	c.Header("Access-Control-Allow-Headers", "Content-type")
 	c.Header("Access-Control-Allow-Method", "POST, GET, OPTIONS, PUT, DELETE")
@@ -361,4 +360,3 @@ func (p *AntrianRepo) CallButtonOffline(c *gin.Context) {
 	c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
 	json.NewEncoder(c.Writer).Encode(responses)
 }
-
