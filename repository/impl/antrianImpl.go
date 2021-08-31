@@ -359,10 +359,10 @@ func getJamKedatanganID() int {
 	endParse6, _ := time.Parse(layoutJam, end6)
 	jam6 := inTimeSpan(startParse6, endParse6, datesParse)
 
-	start7 := "15:00"
+	start7 := "00:00"
 	startParse7, _ := time.Parse(layoutJam, start7)
 
-	end7 := "06:00"
+	end7 := "24:00"
 	endParse7, _ := time.Parse(layoutJam, end7)
 
 	jam7 := inTimeSpan(startParse7, endParse7, datesParse)
@@ -383,7 +383,7 @@ func getJamKedatanganID() int {
 		idJam = 7
 	}
 
-	log.Println("INI DIA ID JAM NYA ", idJam)
+	log.Println("INI DIA ID JAM NYA ", idJam, startParse1)
 
 	return idJam
 }
@@ -614,6 +614,7 @@ func (m *mySQLAntrian) CallButtonOffline(idPelayanan string) (string, bool, erro
 	var idPgl int
 	var pgl bool
 	var idPlyn string
+	log.Println("JamKedatangan ", idJam)
 	// tx := m.Conn.MustBegin()
 
 	switch idPelayanan {
