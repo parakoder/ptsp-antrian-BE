@@ -9,10 +9,9 @@ type ResponseAntrian struct {
 }
 
 type AntrianList struct {
-	No_Antrian     string `json:"noAntrian"`
-	Loket          string `json:"Loket"`
-	Jam_Kedatangan string `json:"jamKedatangan"`
-
+	No_Antrian     string     `json:"noAntrian"`
+	Loket          string     `json:"Loket"`
+	Jam_Kedatangan string     `json:"jamKedatangan"`
 	Lama_Menunggu  *int       `json:"lamaMenunggu"`
 	Lama_Pelayanan *int       `json:"lamaPelayanan"`
 	Jam_Dilayani   *time.Time `json:"jamDilayani"`
