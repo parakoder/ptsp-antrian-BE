@@ -28,7 +28,7 @@ func ConnectSQL() (*DB, error) {
 	userName := os.Getenv("USER_DB")
 	hostPort := os.Getenv("PORT")
 
-	url := fmt.Sprintf("postgres://%v:%v@%v:%v/%v?sslmode=enabled",
+	url := fmt.Sprintf("postgres://%v:%v@%v:%v/%v?sslmode=verify-full",
 		userName,
 		password,
 		hostName,
