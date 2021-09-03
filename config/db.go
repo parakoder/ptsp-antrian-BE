@@ -35,8 +35,8 @@ func ConnectSQL() (*DB, error) {
 		hostPort,
 		dbName)
 	// log.Println("DB COnn ", d)
-	d, err := sql.Open("postgres", os.Getenv("DATABASE_URL"))
-	//d, err := sqlx.Open("postgres", url)
+	//d, err := sql.Open("postgres", os.Getenv("DATABASE_URL"))
+	d, err := sql.Open("postgres", url)
 	if err != nil {
 		panic(err)
 	}
