@@ -28,15 +28,14 @@ func ConnectSQL() (*DB, error) {
 	userName := os.Getenv("USER_DB")
 	hostPort := os.Getenv("PORT")
 
-	url := fmt.Sprintf("postgres://%v:%v@%v:%v/%v?sslmode=required",
+	url := fmt.Sprintf("postgres://%v:%v@%v:%v/%v?sslmode=verify-full sslrootcert=root.crt sslkey=client.key sslcert=client.crt",
 		userName,
 		password,
 		hostName,
 		hostPort,
 		dbName)
 	// log.Println("DB COnn ", d)
-	//d, err := sql.Open("postgres", os.Getenv("DATABASE_URL"))
-	d, err := sql.Open("postgres", url)
+	d, err := sqlx.Open("postgres", url)
 	if err != nil {
 		panic(err)
 	}
